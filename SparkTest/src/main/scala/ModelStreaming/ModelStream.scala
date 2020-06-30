@@ -64,45 +64,7 @@ object ModelStream {
                                                     withColumn("weather_4", when(season_trainDF("weather")===4,1).otherwise(0)).
                                                     drop("weather")
                          
-                        
-                        
-                
-                
-            //      val encodedPipeline = new Pipeline().setStages(indexer ++ encoder)
-            //      val encoded = encodedPipeline.fit(datardd).transform(datardd)
-
-            //      var testdf = encoded.withColumn("day",split(col("datetime"),"-").getItem(0).cast("int")).withColumn("month",split(col("datetime"), "-").getItem(1).cast("int")).withColumn("year",split(split(col("datetime"),"-")(2)," ")(0).cast("int")).withColumn("hour",split(split(col("datetime")," ")(1),":")(0).cast("int")).drop("weather","season")
-
-            //      val feature_cols = Array("holiday","workingday","temp","atemp","humidity","windspeed","casual","registered","hour","day","month","year")
-
-            
-            //      val testoutput = assembler.transform(testdf)
-
-            //      val pipeline = PipelineModel.read.load("/user/edureka_893377/Input/Spark/Final/Model")
-            //      val predictions = pipeline.transform(testoutput)
-
-            /*val pipeline = LinearRegressionModel.read.load("/user/edureka_893377/Input/Spark/Final/Model")
-      val predictions = pipeline.transform(testoutput)
-      val predfile = predictions.select("prediction","datetime")*/
-
-            //Final working code
-           /*
-            val indexer = Array("season", "weather").map(c => new StringIndexer().setInputCol(c).setOutputCol(c + "_Index"))
-
-            val encoder = Array("season", "weather").map(column => new OneHotEncoder().setInputCol(column + "_Index").setOutputCol(column + "_Val"))
-
-            var testdf = datardd.withColumn("day", split(col("datetime"), "-").getItem(0).cast("int")).withColumn("month", split(col("datetime"), "-").getItem(1).cast("int")).withColumn("year", split(split(col("datetime"), "-")(2), " ")(0).cast("int")).withColumn("hour", split(split(col("datetime"), " ")(1), ":")(0).cast("int"))
-
-            val feature_cols = Array("holiday", "workingday", "temp", "atemp", "humidity", "windspeed", "casual", "registered", "season_Index", "weather_Index", "season_Val", "weather_Val", "hour", "day", "month", "year")
-            val assembler = new VectorAssembler().setInputCols(feature_cols).setOutputCol("features")
-             
-            val lr = LinearRegressionModel.read.load("/user/edureka_893377/Input/Spark/Final/Model")
-            val pipeline = new Pipeline().setStages(indexer ++ encoder ++ Array(assembler, lr))
-            val pipelineModel = pipeline.fit(testdf)
-            val predictions = pipelineModel.transform(testdf)
-            
-            predictions.show(2)*/
-            
+   
             var testdf = weather_trainDF.withColumn("day", split(col("datetime"), "-").getItem(0).cast("int")).withColumn("month", split(col("datetime"), "-").getItem(1).cast("int")).withColumn("year", split(split(col("datetime"), "-")(2), " ")(0).cast("int")).withColumn("hour", split(split(col("datetime"), " ")(1), ":")(0).cast("int"))
 
             val model = PipelineModel.read.load("/user/edureka_893377/Input/Spark/Final/Model")
@@ -111,29 +73,10 @@ object ModelStream {
             println("Sample predictions from streaming data")
             predictions.show(2)
             
-//            val feature_cols = Array("holiday", "workingday", "temp", "atemp", "humidity", "windspeed", "casual", "registered", "season_Index", "weather_Index", "season_Val", "weather_Val", "hour", "day", "month", "year")
-//            val feature_cols = Array("holiday", "workingday", "temp", "atemp", "humidity", "windspeed", "casual", "registered", "hour", "day", "month", "year")
-//            val assembler = new VectorAssembler().setInputCols(feature_cols).setOutputCol("features")
-//            val testoutput = assembler.transform(testdf)
-//    
-//            
-//            val lr = LinearRegressionModel.read.load("/user/edureka_893377/Input/Spark/Final/Model")
-//            
-//            val predictions = lr.transform(testoutput)
-//            
-//            predictions.show(2)
-
-            //      predfile.show(2)
-            
-            // saving to DB
-              
+            // saving to DB              
              predictions.write.format("jdbc").mode("overwrite").option("url", "jdbc:mysql://mysqldb.edu.cloudlab.com/edureka_893377").option("driver", "com.mysql.jdbc.Driver").option("dbtable", "predictions").
              option("user", "labuser").option("password", "edureka").save()
               
-              
-             
-            
-
           } else {
             print("********************************************************")
             print("RDD is empty")
